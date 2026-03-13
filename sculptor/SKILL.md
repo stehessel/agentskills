@@ -123,26 +123,42 @@ Write to `{idea-name}/idea.md`:
 
 This is the core cycle. Repeat 1-6 times until the user is satisfied.
 
+### Annotation Format
+
+Annotations use `>>` at the start of a line. This is unambiguous — it won't collide with markdown blockquotes (`>`), code comments (`//`, `#`), or any language syntax inside fenced code blocks.
+
+**Prefixes** (optional but useful):
+
+| Prefix | Meaning | Example |
+|--------|---------|---------|
+| `>>` | Correction / statement | `>> this should use WebSocket, not polling` |
+| `>> ?` | Question | `>> ? why not use Redis instead of SQLite` |
+| `>> +` | Addition | `>> + also needs to handle pagination` |
+| `>> -` | Remove this | `>> - cut this section, out of scope` |
+| `>> !` | Strong opinion | `>> ! must be backwards compatible` |
+
+Bare `>> free text` is always fine — intent can be inferred from context.
+
 ### The Cycle
 
 1. **Prompt the user**:
-   > Open `{idea-name}/idea.md` in your editor and add inline notes wherever you have feedback, corrections, or constraints. Any format works — comments, notes, plain text insertions. Tell me when you're done.
+   > Open `{idea-name}/idea.md` in your editor. Annotate with `>>` lines wherever you have feedback. One thorough pass is ideal. Tell me when you're done.
 
 2. **Wait** for the user to signal they've annotated the file.
 
 3. **Read the file** and identify all annotations — look for:
-   - New text the user inserted (often different tone or style from the original)
-   - Comments in any format (`<!-- -->`, `//`, `NOTE:`, `TODO:`, `[comment]`, etc.)
+   - Lines starting with `>>` (primary annotation format)
+   - Fallback: any other inserted text that doesn't match the document's voice (`//`, `NOTE:`, `TODO:`, `<!-- -->`, etc.)
    - Deletions or strikethroughs
-   - Questions the user added
 
 4. **Address every annotation**:
-   - Respond to questions
-   - Incorporate corrections
-   - Adjust approaches based on constraints
-   - Remove or rework sections the user flagged
+   - Respond to questions (`>> ?`)
+   - Incorporate corrections (`>>`)
+   - Add requested content (`>> +`)
+   - Remove flagged sections (`>> -`)
+   - Respect strong opinions (`>> !`) — these are non-negotiable constraints
 
-5. **Update the document** with all changes.
+5. **Update the document** — Remove all `>>` annotation lines and integrate the changes into the document.
 
 6. **Summarize changes** — Tell the user what you changed and why, so they can decide whether another round is needed.
 
@@ -168,28 +184,6 @@ When the user approves the document:
 ## Phase 6: ESCALATE (optional)
 
 Create additional artifacts based on what the user requests. Each goes through its own annotation cycle if the user wants.
-
-### PRD → `{idea-name}/prd.md`
-
-```markdown
-# PRD: {Idea Name}
-
-## Overview
-[One-paragraph summary]
-
-## User Stories
-[As a {user}, I want {action}, so that {benefit}]
-
-## Acceptance Criteria
-[Concrete, testable criteria for each story]
-
-## Scope
-### In Scope
-### Out of Scope
-
-## Constraints
-[Technical, timeline, resource constraints]
-```
 
 ### Technical Spec → `{idea-name}/spec.md`
 
@@ -236,6 +230,30 @@ If not, create the plan internally:
 [What could go wrong and mitigation]
 ```
 
+### PRD → `{idea-name}/prd.md`
+
+Only create PRD if the user asks for it, skip be default.
+
+```markdown
+# PRD: {Idea Name}
+
+## Overview
+[One-paragraph summary]
+
+## User Stories
+[As a {user}, I want {action}, so that {benefit}]
+
+## Acceptance Criteria
+[Concrete, testable criteria for each story]
+
+## Scope
+### In Scope
+### Out of Scope
+
+## Constraints
+[Technical, timeline, resource constraints]
+```
+
 ## Session Continuity
 
 All state lives in the `{idea-name}/` directory. If a session ends and resumes later:
@@ -247,6 +265,30 @@ All state lives in the `{idea-name}/` directory. If a session ends and resumes l
    - `idea.md` exists → Check for unaddressed annotations (Phase 4) or if it's finalized (Phase 5)
    - `prd.md`, `spec.md`, or `plan.md` exist → Phase 6 in progress
 3. Tell the user where you're picking up and confirm before continuing
+
+## Learnings & Improvements
+
+_Captured from real sculptor sessions. Apply these patterns._
+
+### Research Phase
+
+- **Prompt for "what this is NOT."** During intake, explicitly ask: "What are the non-goals or things you've already ruled out?" Users often have strong instincts about scope exclusions but won't volunteer them until asked. Getting these early prevents unnecessary design options and speeds up annotation rounds.
+
+### Annotation Cycles
+
+- **Acknowledge both annotation paths.** Users may annotate by opening the file in their editor OR by providing annotations inline in chat (via system-reminder diffs). The prompt should say: "Open in your editor and annotate, or paste your notes here — either works."
+- **Aggressive first-round annotation is ideal.** When users mark everything in one pass (rather than making small incremental notes), a single annotation round is often sufficient. Encourage this: "Mark everything — questions, corrections, constraints, preferences — all in one pass."
+
+### Escalation Phase
+
+- **Explicitly offer annotation cycles for each escalated artifact.** After writing each escalated document (spec, plan), ask: "Want to annotate this before I move to the next artifact?" Don't assume the user will ask — they may not realize the option is available.
+- **Formally finalize escalated artifacts.** The idea doc gets a clean finalize pass (removing markers, polishing). Apply the same treatment to spec and plan — clean up, confirm with user, mark as final.
+- **Surface shared design surfaces early.** When an idea involves multiple interfaces (CLI, TUI, agent mode), ask during research: "Are there shared data structures or config formats that serve multiple interfaces?" This prevents rework when these emerge late in drafting. Suggest shared design, patterns, heuristics, mental models where applicable.
+
+### Efficiency
+
+- **The escalation shortcut works.** When users declare upfront which artifacts they want ("give me spec and plan, skip PRD"), respect that and plan the session arc accordingly. Knowing the destination early helps pace the work.
+- **Don't re-research during escalation.** The spec and plan should build on research and idea doc findings, not trigger new exploration. Only research further if the user raises new questions the existing research doesn't cover.
 
 ## Anti-Patterns (DO NOT DO)
 
