@@ -26,7 +26,7 @@ Run on skill activation:
 bd ready --json
 ```
 
-**IF command succeeds:** Proceed to execution loop with the returned ready issues.
+**IF command succeeds:** Proceed to environment setup, then execution loop with the returned ready issues.
 
 **IF command fails with "no repository":**
 - Run `bd doctor` to verify installation
@@ -35,6 +35,15 @@ bd ready --json
 
 **IF no ready issues returned:**
 - Run `bd blocked --json && bd list --status=open --json` to assess state
+
+## Environment Setup
+
+Before writing any source files, run a setup pass. Skipping this causes avoidable LSP noise, version mismatches, and import errors throughout the session.
+
+1. **Verify language/runtime version** — Run the version command (`go version`, `node -v`, `python3 --version`, etc.) and confirm that features used in the spec/plan are available. Flag any mismatches immediately.
+2. **Install all dependencies upfront** — Run the dependency install command (`go get`, `npm install`, `pip install`, etc.) for every dependency the project will need *before* writing source files. This keeps the LSP clean from the start.
+3. **Create package/module stubs** — For multi-package projects, create minimal stub files (`package X` in Go, `__init__.py` in Python, `index.ts` in TypeScript) in each directory so the LSP can resolve cross-package imports while you write interdependent code.
+4. **Default to modern idioms** — Use the current idiomatic style for the language version (`any` not `interface{}` in Go 1.18+, type hints in Python 3.10+, etc.). This avoids cosmetic noise that wastes attention.
 
 ## Type Selection
 
@@ -269,6 +278,9 @@ Use the Write tool to create a `.md` file with all issues:
 - Tasks = concrete, actionable work (specific files, endpoints, functions)
 - Name by WHAT (deliverable), not WHEN (timeline)
 - Each task = 1 focused session max
+- **Always include a Setup task** as the first task (verify versions, install deps, create stubs)
+- **Mark parallel groups** — add `[parallel]` in descriptions for tasks within a phase that have no cross-dependencies. This signals that sub-agents can execute them simultaneously.
+- **Flag TDD candidates** — add `[TDD]` for data-heavy or edge-case-heavy tasks where writing test fixtures first prevents bugs (e.g. parsers, denormalizers, format converters)
 
 **Good task examples:**
 - "Create User model with email, password_hash, created_at fields in models/user.py"
@@ -334,6 +346,14 @@ Execute work:
 - Do EXACTLY what issue describes, no scope creep
 - Do NOT add features, refactor unrelated code, or "improve" things
 - Stay focused on single issue completion criteria
+
+**Parallel execution:** When multiple ready issues are independent (marked `[parallel]` or no cross-dependencies), claim them all and use the `Agent` tool to run sub-agents in parallel. Each sub-agent gets one task. This can be 3-4x faster for phases like initial package implementation.
+
+**TDD for complex logic:** For tasks marked `[TDD]` or involving data transformation, parsing, or edge-case-heavy logic:
+1. Write test fixtures (sample inputs in `testdata/` or inline)
+2. Write test cases with **computed** expected values (don't guess — actually calculate the expected output)
+3. Implement until tests pass
+This catches bugs that post-hoc testing misses, especially for format conversions and denormalization.
 
 ### 3. Handle Outcome
 
@@ -423,6 +443,10 @@ This persists Beads state to git. Without this, changes may not sync to remote. 
 - **Omitting `--json` flag** (human-readable output is harder to parse and wastes tokens)
 - **Making separate Bash calls for related operations** (chain with `&&` instead)
 - **Using `bd dep add A B` for blocking deps** — argument order is `<blocked> <blocker>` (reversed from intuition). Use `bd dep <blocker> --blocks <blocked>` instead.
+- **Writing source files before installing dependencies** — install all deps first so LSP works cleanly from the start
+- **Implementing independent tasks sequentially** when sub-agents could run them in parallel — use the `Agent` tool for `[parallel]` task groups
+- **Guessing test expected values** — compute the correct expected output; wrong assertions waste debug cycles (e.g. Levenshtein distance, hash values)
+- **Inconsistent naming across files** — pick one name (`jsonErr` or `jsonError`, not both) and use it everywhere from the start
 
 ---
 

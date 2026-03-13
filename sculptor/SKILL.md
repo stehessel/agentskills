@@ -135,7 +135,7 @@ Annotations use `>>` at the start of a line. This is unambiguous — it won't co
 | `>> ?` | Question | `>> ? why not use Redis instead of SQLite` |
 | `>> +` | Addition | `>> + also needs to handle pagination` |
 | `>> -` | Remove this | `>> - cut this section, out of scope` |
-| `>> !` | Strong opinion | `>> ! must be backwards compatible` |
+| `>> *` | Strong opinion | `>> * must be backwards compatible` |
 
 Bare `>> free text` is always fine — intent can be inferred from context.
 
@@ -156,7 +156,7 @@ Bare `>> free text` is always fine — intent can be inferred from context.
    - Incorporate corrections (`>>`)
    - Add requested content (`>> +`)
    - Remove flagged sections (`>> -`)
-   - Respect strong opinions (`>> !`) — these are non-negotiable constraints
+   - Respect strong opinions (`>> *`) — these are non-negotiable constraints
 
 5. **Update the document** — Remove all `>>` annotation lines and integrate the changes into the document.
 
@@ -187,24 +187,40 @@ Create additional artifacts based on what the user requests. Each goes through i
 
 ### Technical Spec → `{idea-name}/spec.md`
 
+The spec is the single most important artifact for autonomous implementation. An implementation-grade spec eliminates clarifying questions and wrong guesses. **Describe HOW, not just WHAT.**
+
 ```markdown
 # Technical Spec: {Idea Name}
 
 ## Architecture
-[High-level design, system boundaries]
+[High-level design, system boundaries, package/module layout]
 
 ## Data Model
-[Entities, relationships, schemas]
+[Exact table schemas with column names, types, and constraints.
+Exact struct/class definitions. Not "a user table" — the actual CREATE TABLE or type definition.]
 
 ## API Surface
-[Endpoints, contracts, protocols]
+[Exact endpoint paths, request/response shapes, error formats.
+Include code snippets for non-obvious logic — edge cases, parsing, retries.]
 
 ## Integrations
-[External systems, dependencies]
+[External systems, dependencies, expected response formats.
+Include representative sample payloads in fenced code blocks for complex external data.]
 
 ## Security & Privacy
 [Authentication, authorization, data handling]
+
+## Known Gotchas
+[Language version constraints, common pitfalls with chosen frameworks,
+initialization patterns to avoid, idiomatic preferences (e.g. `any` vs `interface{}`)]
 ```
+
+**Spec quality checklist** — before finalizing, verify the spec includes:
+- Exact schemas/types (not prose descriptions of data)
+- Code snippets for any non-obvious logic or edge cases
+- Sample payloads for external data the system will consume
+- Language/framework version requirements and feature availability
+- Known pitfalls with the chosen tech stack
 
 ### Implementation Plan → `{idea-name}/plan.md`
 
@@ -215,7 +231,12 @@ If not, create the plan internally:
 ```markdown
 # Implementation Plan: {Idea Name}
 
-## Phase 1: {Phase Name}
+## Setup
+- [ ] Verify language/runtime version and available features
+- [ ] Install all dependencies before writing source files
+- [ ] Create package/module stubs so LSP resolves imports during implementation
+
+## Phase 1: {Phase Name} [parallel]
 - [ ] Task 1: {specific, actionable description}
 - [ ] Task 2: {specific, actionable description}
 
@@ -229,6 +250,12 @@ If not, create the plan internally:
 ## Risks
 [What could go wrong and mitigation]
 ```
+
+**Plan quality rules:**
+- Always include a **Setup** phase for environment verification and dependency installation
+- Mark phases/tasks as **`[parallel]`** when tasks have no cross-dependencies — this signals to the implementing agent that sub-agents can run simultaneously
+- Task descriptions must name specific files, endpoints, or functions — "implement sync" is too vague, "implement `internal/sync/engine.go`: field discovery, denormalization, ALTER TABLE for new custom fields" is actionable
+- For data-heavy or edge-case-heavy packages, note **"TDD recommended"** — write test fixtures and cases before implementation
 
 ### PRD → `{idea-name}/prd.md`
 
@@ -284,6 +311,13 @@ _Captured from real sculptor sessions. Apply these patterns._
 - **Explicitly offer annotation cycles for each escalated artifact.** After writing each escalated document (spec, plan), ask: "Want to annotate this before I move to the next artifact?" Don't assume the user will ask — they may not realize the option is available.
 - **Formally finalize escalated artifacts.** The idea doc gets a clean finalize pass (removing markers, polishing). Apply the same treatment to spec and plan — clean up, confirm with user, mark as final.
 - **Surface shared design surfaces early.** When an idea involves multiple interfaces (CLI, TUI, agent mode), ask during research: "Are there shared data structures or config formats that serve multiple interfaces?" This prevents rework when these emerge late in drafting. Suggest shared design, patterns, heuristics, mental models where applicable.
+
+### Spec Quality
+
+- **Specs must be implementation-grade, not description-grade.** The difference between "a user table with standard fields" and an exact `CREATE TABLE` statement with column names, types, and constraints is the difference between an implementing agent that guesses and one that executes cleanly. Always include exact schemas, struct definitions, API contracts, and code snippets for edge cases.
+- **Include sample data for complex external inputs.** If the system consumes external API responses (Jira, Stripe, GitHub, etc.), include 2-3 representative JSON payloads. This lets the implementer write realistic tests and handle real edge cases (nested structures, null fields, unexpected arrays).
+- **Note language version and feature availability.** If the spec uses language features (e.g. Go's `iter.Seq2`, Python 3.12 type parameter syntax), explicitly state the required version. Implementers shouldn't discover version mismatches mid-session.
+- **Surface known gotchas.** Every tech stack has pitfalls (cobra init cycles in Go, circular imports in Python, hydration mismatches in React). If you know them, document them in the spec — they'll save the implementer a debug cycle.
 
 ### Efficiency
 
