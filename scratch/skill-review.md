@@ -120,3 +120,6 @@ Several anti-patterns repeated guidance already covered in earlier sections (e.g
 | `beadflow/SKILL.md` | Removed generic Environment Setup section | Not skill-specific |
 | `beadflow/COMMANDS.md` | New file: full command reference | Referenced from main skill |
 | `beadflow/PLAN-FORMAT.md` | New file: markdown file format for bd create -f | Referenced from main skill |
+| `beadflow/SCULPTOR-IMPORT.md` | New file: conversion mapping and enrichment steps for importing sculptor plans | Bridges sculptor → beadflow without manual reformatting |
+| `beadflow/SKILL.md` | Added "Sculptor Import" path to Planning Mode | Detects sculptor artifacts and follows import guide |
+| `sculptor/PLAN-TEMPLATE.md` | Added "Handoff to BeadFlow" section | Documents the `/beadflow import sculptor` entry point |

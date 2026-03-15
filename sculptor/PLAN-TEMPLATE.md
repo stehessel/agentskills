@@ -41,3 +41,13 @@
 * Task descriptions must name specific files, endpoints, or functions — "implement sync" is too vague, "implement `internal/sync/engine.go`: field discovery, denormalization, ALTER TABLE for new custom fields" is actionable
 * For data-heavy or edge-case-heavy packages, note **"TDD recommended"** — write test fixtures and cases before implementation
 * Try to keep a task sufficiently detailed for the agent. Refer to other artifacts like the spec, idea, appendix files where the additional context helps the agent
+
+## Handoff to BeadFlow
+
+This plan can be imported directly into beadflow for execution tracking:
+
+```
+/beadflow import sculptor {idea-name}/
+```
+
+BeadFlow reads the plan (plus spec, idea, and appendix files for context) and converts it into Beads issues automatically — no manual reformatting needed. See `beadflow/SCULPTOR-IMPORT.md` for the conversion mapping.

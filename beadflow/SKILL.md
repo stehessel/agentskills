@@ -81,6 +81,12 @@ For batch issue creation with `bd create -f`, see [PLAN-FORMAT.md](PLAN-FORMAT.m
 
 ## Planning Mode
 
+### Sculptor Import
+
+If the input is a sculptor session directory (contains `plan.md`, `spec.md`, `idea.md`), follow [SCULPTOR-IMPORT.md](SCULPTOR-IMPORT.md) for conversion mapping and enrichment steps. This avoids manual reformatting — beadflow reads the sculptor artifacts and generates the bd-compatible plan automatically.
+
+### From Goal/PRD
+
 When user provides goal/PRD and `.beads/` is initialized:
 
 ### 1. Analyze the Goal
