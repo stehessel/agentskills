@@ -1,10 +1,10 @@
 ---
 name: beadflow
-description: Autonomous task management using Beads. Use when working on multi-step projects, breaking down PRDs, or managing complex implementations. Tracks all work in Beads issue graph.
+description: Autonomous task planning and execution using Beads (bd). Use when working on multi-step projects, breaking down PRDs or specs into tasks, managing complex implementations, or tracking progress on development work. Creates and manages issues in the Beads issue graph.
 allowed-tools: "Read, Write, Bash(bd:*)"
 ---
 
-# TaskFlow - Autonomous Planning & Execution with Beads
+# BeadFlow - Autonomous Planning & Execution with Beads
 
 You are an autonomous agent using **Beads** (`bd`) as the system of record. Every strategic action must create or update a Beads issue.
 
@@ -26,7 +26,7 @@ Run on skill activation:
 bd ready --json
 ```
 
-**IF command succeeds:** Proceed to environment setup, then execution loop with the returned ready issues.
+**IF command succeeds:** Proceed to the execution loop with the returned ready issues.
 
 **IF command fails with "no repository":**
 - Run `bd doctor` to verify installation
@@ -35,15 +35,6 @@ bd ready --json
 
 **IF no ready issues returned:**
 - Run `bd blocked --json && bd list --status=open --json` to assess state
-
-## Environment Setup
-
-Before writing any source files, run a setup pass. Skipping this causes avoidable LSP noise, version mismatches, and import errors throughout the session.
-
-1. **Verify language/runtime version** — Run the version command (`go version`, `node -v`, `python3 --version`, etc.) and confirm that features used in the spec/plan are available. Flag any mismatches immediately.
-2. **Install all dependencies upfront** — Run the dependency install command (`go get`, `npm install`, `pip install`, etc.) for every dependency the project will need *before* writing source files. This keeps the LSP clean from the start.
-3. **Create package/module stubs** — For multi-package projects, create minimal stub files (`package X` in Go, `__init__.py` in Python, `index.ts` in TypeScript) in each directory so the LSP can resolve cross-package imports while you write interdependent code.
-4. **Default to modern idioms** — Use the current idiomatic style for the language version (`any` not `interface{}` in Go 1.18+, type hints in Python 3.10+, etc.). This avoids cosmetic noise that wastes attention.
 
 ## Type Selection
 
@@ -72,190 +63,21 @@ Before writing any source files, run a setup pass. Skipping this causes avoidabl
 
 ## Command Reference
 
-### Batch Creation (preferred for multiple issues)
-```bash
-bd create -f plan.md --json
-```
-Write a `.md` file with all issues, then create them all in one command. See [Markdown File Format](#markdown-file-format) below.
+See [COMMANDS.md](COMMANDS.md) for the full command reference including batch creation, updates, closes, dependencies, comments, visibility, and command chaining.
 
-### Single Issue Creation (with combined flags)
+Key commands:
 ```bash
-bd create "Title" -t <type> -p <priority> -d "Description" --parent <parent-id> --json
-bd create "Title" -t bug -p 1 --deps "discovered-from:<id>" --json
-bd q "Title" -t task -p 2                  # Quick capture: outputs only the ID
-```
-Use `--deps` to create with dependencies in one command. Use `--parent` for hierarchy.
-
-### Find Work
-```bash
-bd ready --json                             # Unblocked, actionable issues (includes full details)
-bd blocked --json                           # Blocked issues
-bd list --json                              # All issues
-bd show <id> --json                         # Full issue details (use only when ready output is insufficient)
-bd show <id1> <id2> --json                  # Batch show multiple issues
+bd ready --json                    # Find unblocked, actionable issues
+bd update <id> --status in_progress --json  # Claim work
+bd close <id> --reason "Done" --suggest-next --json  # Close and get next
+bd dolt push                       # ALWAYS run before session end
 ```
 
-### Update (supports multiple IDs)
-```bash
-bd update <id> --status in_progress --json
-bd update <id1> <id2> <id3> --priority 0 --json
-bd update <id> --status blocked --json
-bd update <id> --notes "COMPLETED: X. NEXT: Y" --json
-bd update <id> --append-notes "Progress update" --json
-```
-
-### Close (supports multiple IDs)
-```bash
-bd close <id> --reason "Done" --suggest-next --json   # Close and get next ready issue
-bd close <id1> <id2> <id3> --reason "Batch done" --json
-```
-
-### Dependencies
-
-> **CRITICAL: argument order for `bd dep add` is `<blocked-id> <blocker-id>` (blocked first, blocker second).**
-> Use `bd dep <blocker-id> --blocks <blocked-id>` to avoid confusion — it reads naturally and is unambiguous.
-
-```bash
-# Preferred: unambiguous --blocks syntax
-bd dep <blocker-id> --blocks <blocked-id> --json               # blocker blocks blocked
-bd dep <child-id> --blocks <parent-id> -t parent-child --json  # WRONG for hierarchy (see below)
-
-# Hierarchy uses dep add (child depends on parent):
-bd dep add <child-id> <parent-id> -t parent-child --json       # child belongs to parent
-
-# Chain multiple with --blocks:
-bd dep <id1> --blocks <id2> && bd dep <id3> --blocks <id4>     # chain multiple blockers
-```
-
-**Argument order reference:**
-- `bd dep add A B` → A depends on B (B blocks A). First arg is BLOCKED, second is BLOCKER.
-- `bd dep A --blocks B` → A blocks B. Reads naturally. Use this for all blocking deps.
-
-### Comments
-```bash
-bd comments add <id> "Progress notes" --json
-```
-
-### Visibility
-```bash
-bd graph --all                              # Full dependency graph
-bd graph <epic-id>                          # Epic-specific graph
-```
-
-### Session End
-```bash
-bd dolt push                                # ALWAYS run before session end (bd sync is deprecated)
-```
-
-## Command Chaining
-
-Chain sequential operations in a single Bash tool call with `&&`:
-
-```bash
-# Claim and show in one call
-bd update <id> --status in_progress --json && bd show <id> --json
-
-# Block current + create unblocking task in one call
-bd update <id> --status blocked --json && bd create "Unblock: <reason>" -t task -p 1 --deps "<blocked-id>" --json
-
-# Decompose large issue into subtasks in one call
-bd create "Subtask 1" -t task --parent <id> --json && bd create "Subtask 2" -t task --parent <id> --json && bd close <id> --json
-```
+> **CRITICAL: For blocking deps, use `bd dep <blocker> --blocks <blocked>` — NOT `bd dep add A B`** (argument order is unintuitive).
 
 ## Markdown File Format
 
-For `bd create -f`, write a `.md` file using this structure:
-
-- `## Title` (H2) starts each issue
-- `### Section` (H3) sets metadata within an issue
-- Lines after `## Title` before any `###` become the description
-
-### Recognized Sections
-
-| Section | Content | Default |
-|---------|---------|---------|
-| `### Priority` | `0`-`4` or `P0`-`P4` | `2` |
-| `### Type` | `bug`, `feature`, `task`, `epic`, `chore` | `task` |
-| `### Description` | Multi-line text (overrides auto-description) | — |
-| `### Design` | Implementation approach, architecture notes | — |
-| `### Acceptance Criteria` | Definition of done, success criteria | — |
-| `### Assignee` | Username | — |
-| `### Labels` | Comma or space-separated | — |
-| `### Dependencies` | `blocks:id, discovered-from:id, parent-child:id` | — |
-
-### Example Plan File
-
-```markdown
-## Goal: Build Authentication System
-
-### Type
-epic
-
-### Priority
-0
-
-### Description
-End-to-end auth system with JWT tokens, login/logout, and password reset.
-
-### Acceptance Criteria
-- Users can register, login, and logout
-- JWT tokens with refresh rotation
-- Password reset via email
-
-## Create User model with email, password_hash, created_at fields
-
-### Type
-task
-
-### Priority
-2
-
-### Description
-Create the User model in models/user.py with all required fields and migrations.
-
-## Add POST /api/auth/login endpoint
-
-### Type
-task
-
-### Priority
-2
-
-### Description
-Login endpoint in routes/auth.py. Validates credentials, returns JWT access + refresh tokens.
-
-## Add POST /api/auth/logout endpoint
-
-### Type
-task
-
-### Priority
-2
-
-### Description
-Logout endpoint that invalidates the refresh token.
-
-## Write unit tests for authentication
-
-### Type
-task
-
-### Priority
-2
-
-### Description
-Tests for register, login, logout, and token refresh in tests/test_auth.py.
-```
-
-**Note:** Issues created in the same file cannot reference each other's IDs (unknown at creation time). Add cross-issue dependencies after creation:
-
-```bash
-bd create -f plan.md --json
-# Parse returned IDs, then chain dependency additions using --blocks (blocker first, clear direction):
-bd dep <user-model-id> --blocks <login-id> && bd dep <login-id> --blocks <logout-id> && bd dep <logout-id> --blocks <tests-id>
-# Add hierarchy (dep add with parent-child type: child first, parent second):
-bd dep add <user-model-id> <epic-id> -t parent-child && bd dep add <login-id> <epic-id> -t parent-child
-```
+For batch issue creation with `bd create -f`, see [PLAN-FORMAT.md](PLAN-FORMAT.md) for the full format specification and examples.
 
 ## Planning Mode
 

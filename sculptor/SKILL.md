@@ -1,6 +1,6 @@
 ---
 name: sculptor
-description: Collaborative idea polishing through structured dialogue and annotation cycles. Use when exploring, refining, or formalizing ideas into specs, PRDs, or implementation plans.
+description: Collaborative idea polishing through structured dialogue and annotation cycles. Use when the user wants to brainstorm, explore, refine, or formalize ideas into specs, PRDs, or implementation plans. Handles research, drafting, annotation review, and technical spec creation.
 ---
 
 # Sculptor — Collaborative Idea Polishing
@@ -44,37 +44,32 @@ When the user presents an idea:
 
 ## Phase 2: RESEARCH
 
-Gather context from every available source. Be thorough — this is where unexamined assumptions get caught.
+Gather context from all available sources: codebase, web, user-provided docs, and targeted dialogue.
 
-### Sources (use all that apply)
+### Validate Assumptions (when feasible)
 
-- **Codebase**: Read relevant files, docs, recent commits. Understand existing patterns.
-- **Web**: Search for competitors, prior art, technical approaches, relevant standards.
-- **User-provided**: Read any documents, links, or references the user shares.
-- **Dialogue**: Ask the user targeted questions to extract domain knowledge they haven't articulated yet.
+When the idea involves intercepting, proxying, or integrating with an existing system, suggest a quick validation test before drafting:
+
+> "Can we run a 5-minute test to see what [the system] actually sends/receives?"
+
+This replaces speculation with concrete data.
+
+### Deep research
+
+* **Create appendix files** for substantive topics. See [APPENDIX-TEMPLATE.md](APPENDIX-TEMPLATE.md) for the format. Link each appendix from the relevant section in research.md.
+* **Don't wait idle for background research agents.** Start writing the research doc with findings you already have. Integrate agent results when they complete.
+* **Aggressive first-round annotation is ideal.** Encourage users to mark everything in one pass: "Mark everything — questions, corrections, constraints, preferences — all in one pass." Providing more detailed ideas, options, and exploration paths early reduces annotation cycles.
+* **Surface shared design surfaces early.** Ask: "Are there shared data structures or config formats that serve multiple interfaces?" This prevents rework when these emerge late.
+
+### Clarify Out of scope
+
+**Prompt for "what this is NOT."** During intake, explicitly ask: "What are the non-goals or things you've already ruled out?" Users often have strong instincts about scope exclusions but won't volunteer them until asked. Getting these early prevents unnecessary design options and speeds up annotation rounds.
+
+When possible, share early exploration paths which the user can say yes or no to.
 
 ### Output
 
-Write findings to `{idea-name}/research.md` with clear sections:
-
-```markdown
-# Research: {Idea Name}
-
-## Problem Space
-[What problem exists, who has it, why it matters]
-
-## Prior Art
-[Existing solutions, competitors, relevant projects]
-
-## Technical Landscape
-[Relevant technologies, constraints, opportunities]
-
-## Key Insights
-[What we learned that shapes the approach]
-
-## Open Questions
-[Things we still need to figure out]
-```
+Write findings to `{idea-name}/research.md`. See [RESEARCH-TEMPLATE.md](RESEARCH-TEMPLATE.md) for the template.
 
 **Tell the user**: "Research is in `{idea-name}/research.md` — review it and let me know if anything is missing or wrong before we move on."
 
@@ -86,38 +81,7 @@ Structure the idea into a polished document.
 
 ### Output
 
-Write to `{idea-name}/idea.md`:
-
-```markdown
-# {Idea Name}
-
-## Problem
-[Clear statement of the problem being solved]
-
-## Context
-[Background, constraints, assumptions]
-
-## Proposed Approaches
-
-### Approach A: {Name}
-[Description, how it works, trade-offs]
-
-### Approach B: {Name}
-[Description, how it works, trade-offs]
-
-### Approach C: {Name} (if warranted)
-[Description, how it works, trade-offs]
-
-## Recommendation
-[Which approach and why]
-
-## Open Questions
-[Remaining uncertainties]
-```
-
-**Scaling**: For simple ideas, collapse this to Problem + Solution + Rationale. For complex ones, add sections as needed (data model sketches, API shapes, user flows, etc.).
-
-**Present design in sections** — Walk the user through each major section and get their reaction before moving on.
+Write to `{idea-name}/idea.md`. See [IDEA-TEMPLATE.md](IDEA-TEMPLATE.md) for the template, scaling guidance, and tips on deferred features.
 
 ## Phase 4: ANNOTATE
 
@@ -166,158 +130,81 @@ Bare `>> free text` is always fine — intent can be inferred from context.
 
 Stay in ideation. If you catch yourself thinking about file structures, package choices, or build configs — stop. That's implementation. Keep sculpting the idea.
 
-## Phase 5: FINALIZE
+## Phase 5: SPECS and IMPLEMENTATION PLAN
 
-When the user approves the document:
+Create additional artifacts once we have a crisp idea document, once the user approves moving to this phase.
 
-1. **Clean up** — Remove any remaining annotation markers, polish prose, ensure consistency.
-2. **Write the final version** to `{idea-name}/idea.md`.
-3. **Ask the user** if they want to escalate to additional artifacts:
-   - PRD (product requirements document)
-   - Technical spec
-   - Implementation plan
+**IMPORTANT**: After writing each escalated artifact, pause and explicitly ask:
+> "Want to annotate `{artifact}.md` before I continue to the next one?"
 
-**IF the user says no:** The skill is complete. The polished idea document is the deliverable.
+Each artifact goes through its own annotation cycle if the user wants.
 
-**IF the user says yes:** Proceed to Phase 6.
-
-## Phase 6: ESCALATE (optional)
-
-Create additional artifacts based on what the user requests. Each goes through its own annotation cycle if the user wants.
+After the user approves each escalated artifact:
+1. Remove all annotation markers
+2. Polish formatting and consistency
+3. Verify cross-references between artifacts (spec references plan phases, plan references spec schemas)
+4. Confirm with user: "{Artifact} is finalized. Moving to {next artifact}."
 
 ### Technical Spec → `{idea-name}/spec.md`
 
 The spec is the single most important artifact for autonomous implementation. An implementation-grade spec eliminates clarifying questions and wrong guesses. **Describe HOW, not just WHAT.**
 
-```markdown
-# Technical Spec: {Idea Name}
-
-## Architecture
-[High-level design, system boundaries, package/module layout]
-
-## Data Model
-[Exact table schemas with column names, types, and constraints.
-Exact struct/class definitions. Not "a user table" — the actual CREATE TABLE or type definition.]
-
-## API Surface
-[Exact endpoint paths, request/response shapes, error formats.
-Include code snippets for non-obvious logic — edge cases, parsing, retries.]
-
-## Integrations
-[External systems, dependencies, expected response formats.
-Include representative sample payloads in fenced code blocks for complex external data.]
-
-## Security & Privacy
-[Authentication, authorization, data handling]
-
-## Known Gotchas
-[Language version constraints, common pitfalls with chosen frameworks,
-initialization patterns to avoid, idiomatic preferences (e.g. `any` vs `interface{}`)]
-```
-
-**Spec quality checklist** — before finalizing, verify the spec includes:
-- Exact schemas/types (not prose descriptions of data)
-- Code snippets for any non-obvious logic or edge cases
-- Sample payloads for external data the system will consume
-- Language/framework version requirements and feature availability
-- Known pitfalls with the chosen tech stack
+See [SPEC-TEMPLATE.md](SPEC-TEMPLATE.md) for the full template and quality checklist.
 
 ### Implementation Plan → `{idea-name}/plan.md`
 
 First: check if a `writing-plans` skill is available. If so, invoke it with the context from this session.
 
-If not, create the plan internally:
+If not, create the plan internally in a tree format. Create sub tasks where it makes sense, skip if the sub task makes it too granular for the agent.
 
-```markdown
-# Implementation Plan: {Idea Name}
+See [PLAN-TEMPLATE.md](PLAN-TEMPLATE.md) for the full template and quality rules.
 
-## Setup
-- [ ] Verify language/runtime version and available features
-- [ ] Install all dependencies before writing source files
-- [ ] Create package/module stubs so LSP resolves imports during implementation
+## Phase 6: FINALIZE
 
-## Phase 1: {Phase Name} [parallel]
-- [ ] Task 1: {specific, actionable description}
-- [ ] Task 2: {specific, actionable description}
+When the user approves the document:
 
-## Phase 2: {Phase Name}
-- [ ] Task 3: {specific, actionable description}
-- [ ] Task 4: {specific, actionable description}
+1. **Clean up** — Remove any remaining annotation markers, polish prose, ensure consistency.
+2. **Write the final version** for each of the artifacts.
+   - Idea
+   - Technical spec
+   - Implementation plan
 
-## Dependencies
-[What blocks what]
+Proceed to Phase 7  once user approves.
 
-## Risks
-[What could go wrong and mitigation]
-```
+## Phase 7: FEEDBACK
 
-**Plan quality rules:**
-- Always include a **Setup** phase for environment verification and dependency installation
-- Mark phases/tasks as **`[parallel]`** when tasks have no cross-dependencies — this signals to the implementing agent that sub-agents can run simultaneously
-- Task descriptions must name specific files, endpoints, or functions — "implement sync" is too vague, "implement `internal/sync/engine.go`: field discovery, denormalization, ALTER TABLE for new custom fields" is actionable
-- For data-heavy or edge-case-heavy packages, note **"TDD recommended"** — write test fixtures and cases before implementation
+Share feedback after the previous phase is finalized:
 
-### PRD → `{idea-name}/prd.md`
+1. Write `{idea-name}/feedback.md` covering:
+   - What went well in the session
+   - What could've been better (process improvements)
+   - Feedback for the user (what made them effective, suggestions)
+   - Suggestions for skill improvement (concrete SKILL.md changes)
+   - Any other feedback or ideas that will help the agent and the user to be more effective.
+2. This captures learnings while they're fresh and feeds back into the Learnings section.
 
-Only create PRD if the user asks for it, skip be default.
-
-```markdown
-# PRD: {Idea Name}
-
-## Overview
-[One-paragraph summary]
-
-## User Stories
-[As a {user}, I want {action}, so that {benefit}]
-
-## Acceptance Criteria
-[Concrete, testable criteria for each story]
-
-## Scope
-### In Scope
-### Out of Scope
-
-## Constraints
-[Technical, timeline, resource constraints]
-```
+**The skill is complete. The polished documents are the deliverables. We'll not write any code from here onwards.**
 
 ## Session Continuity
 
 All state lives in the `{idea-name}/` directory. If a session ends and resumes later:
 
 1. Read all files in the directory
-2. Detect the current phase:
+2. Detect the current phase based on which files exist.
    - Only directory exists → Phase 1 (INTAKE)
    - `research.md` exists → Phase 2 complete, check if `idea.md` exists
    - `idea.md` exists → Check for unaddressed annotations (Phase 4) or if it's finalized (Phase 5)
    - `prd.md`, `spec.md`, or `plan.md` exist → Phase 6 in progress
+   - `feedback.md` exist → Phase 7 in progress
 3. Tell the user where you're picking up and confirm before continuing
 
 ## Learnings & Improvements
 
 _Captured from real sculptor sessions. Apply these patterns._
 
-### Research Phase
-
-- **Prompt for "what this is NOT."** During intake, explicitly ask: "What are the non-goals or things you've already ruled out?" Users often have strong instincts about scope exclusions but won't volunteer them until asked. Getting these early prevents unnecessary design options and speeds up annotation rounds.
-
-### Annotation Cycles
-
-- **Acknowledge both annotation paths.** Users may annotate by opening the file in their editor OR by providing annotations inline in chat (via system-reminder diffs). The prompt should say: "Open in your editor and annotate, or paste your notes here — either works."
-- **Aggressive first-round annotation is ideal.** When users mark everything in one pass (rather than making small incremental notes), a single annotation round is often sufficient. Encourage this: "Mark everything — questions, corrections, constraints, preferences — all in one pass."
-
-### Escalation Phase
-
-- **Explicitly offer annotation cycles for each escalated artifact.** After writing each escalated document (spec, plan), ask: "Want to annotate this before I move to the next artifact?" Don't assume the user will ask — they may not realize the option is available.
-- **Formally finalize escalated artifacts.** The idea doc gets a clean finalize pass (removing markers, polishing). Apply the same treatment to spec and plan — clean up, confirm with user, mark as final.
-- **Surface shared design surfaces early.** When an idea involves multiple interfaces (CLI, TUI, agent mode), ask during research: "Are there shared data structures or config formats that serve multiple interfaces?" This prevents rework when these emerge late in drafting. Suggest shared design, patterns, heuristics, mental models where applicable.
-
 ### Spec Quality
 
-- **Specs must be implementation-grade, not description-grade.** The difference between "a user table with standard fields" and an exact `CREATE TABLE` statement with column names, types, and constraints is the difference between an implementing agent that guesses and one that executes cleanly. Always include exact schemas, struct definitions, API contracts, and code snippets for edge cases.
-- **Include sample data for complex external inputs.** If the system consumes external API responses (Jira, Stripe, GitHub, etc.), include 2-3 representative JSON payloads. This lets the implementer write realistic tests and handle real edge cases (nested structures, null fields, unexpected arrays).
-- **Note language version and feature availability.** If the spec uses language features (e.g. Go's `iter.Seq2`, Python 3.12 type parameter syntax), explicitly state the required version. Implementers shouldn't discover version mismatches mid-session.
-- **Surface known gotchas.** Every tech stack has pitfalls (cobra init cycles in Go, circular imports in Python, hydration mismatches in React). If you know them, document them in the spec — they'll save the implementer a debug cycle.
+See [SPEC-TEMPLATE.md](SPEC-TEMPLATE.md) for detailed spec quality learnings.
 
 ### Efficiency
 
