@@ -107,13 +107,20 @@ Use the Write tool to create a `.md` file with all issues:
 - Name by WHAT (deliverable), not WHEN (timeline)
 - Each task = 1 focused session max
 - **Always include a Setup task** as the first task (verify versions, install deps, create stubs)
+- **Always include a Coverage Review task** as the last task in each phase: *"List all [activities/handlers/modules] in this phase with no test coverage and justify each omission."* This makes coverage tradeoffs explicit before they accumulate into debt.
 - **Mark parallel groups** — add `[parallel]` in descriptions for tasks within a phase that have no cross-dependencies. This signals that sub-agents can execute them simultaneously.
 - **Flag TDD candidates** — add `[TDD]` for data-heavy or edge-case-heavy tasks where writing test fixtures first prevents bugs (e.g. parsers, denormalizers, format converters)
+- **Add a shared-dependencies task** for any phase that introduces a central registry, dependency container, or shared struct (e.g. an `Activities` struct, a service locator, a plugin registry). This task runs first in the phase and stubs all fields/dependencies from the spec's external systems list. Files written later in the phase reference the stub; the build confirms wiring. Without this, every new client/dependency causes a retroactive edit to the shared struct scattered across multiple commits.
 
 **Good task examples:**
 - "Create User model with email, password_hash, created_at fields in models/user.py"
 - "Add POST /api/auth/login endpoint in routes/auth.py returning JWT"
 - "Write unit tests for authenticate() in tests/test_auth.py"
+
+The highest-quality task descriptions include: file path + function name + signature + behavior + thresholds + destination. Example:
+> "Create `internal/workflow/oom_report.go`: OOMReportWorkflow(ctx) error — runs weekly. AggregateOOMEvents(ctx) ([]OOMEvent, error) — query Konflux PipelineRun logs. If count > threshold (5/week): post to #konflux-users."
+
+This format is executable without any further design work and produces correct first-draft code consistently.
 
 **Bad task examples:**
 - "Implement backend" (too vague)
@@ -174,6 +181,27 @@ Execute work:
 - Do EXACTLY what issue describes, no scope creep
 - Do NOT add features, refactor unrelated code, or "improve" things
 - Stay focused on single issue completion criteria
+
+**Before writing any new type, class, or struct** — search the codebase for existing definitions first. Duplicate type definitions cause compile errors that require a read-fix cycle. One grep before writing saves multiple round-trips:
+```bash
+# Search for existing type definitions before creating a new one
+grep -r "type TypeName\|class TypeName\|TypeName =" ./src/
+```
+
+**Before writing any call site** — verify the callee's actual signature with LSP hover or grep, not memory. Wrong signatures (wrong arg count, wrong constant name, wrong method name) are a common error class that `go build` catches but requires a read-fix-rebuild cycle to resolve. The CLAUDE.md rule "prefer LSP" applies at authoring time, not just navigation time.
+
+**After writing or editing any file** — use the compiler/build tool as ground truth, not LSP diagnostics. LSP diagnostics on recently-modified files can lag and show stale errors from the previous version. `go build ./...`, `cargo check`, `tsc`, etc. are authoritative.
+
+**When writing a stub** — mark it explicitly and document the contract:
+```go
+// STUB: real implementation calls POST /api/v1/clusters with ClusterConfig JSON.
+// Expected response: {"name": "cluster-name", "status": "provisioning"}
+// Error conditions: 409 if name already exists, 403 if quota exceeded.
+func (c *Client) CreateCluster(ctx context.Context, cfg ClusterConfig) (string, error) {
+    return cfg.Name, nil
+}
+```
+The function body is a placeholder; the comment is the real value. A reader implementing the production version should not have to infer the API contract from context.
 
 **Parallel execution:** When multiple ready issues are independent (marked `[parallel]` or no cross-dependencies), claim them all and use the `Agent` tool to run sub-agents in parallel. Each sub-agent gets one task. This can be 3-4x faster for phases like initial package implementation.
 
@@ -275,6 +303,12 @@ This persists Beads state to git. Without this, changes may not sync to remote. 
 - **Implementing independent tasks sequentially** when sub-agents could run them in parallel — use the `Agent` tool for `[parallel]` task groups
 - **Guessing test expected values** — compute the correct expected output; wrong assertions waste debug cycles (e.g. Levenshtein distance, hash values)
 - **Inconsistent naming across files** — pick one name (`jsonErr` or `jsonError`, not both) and use it everywhere from the start
+- **Defining types without checking for existing ones** — always search the codebase before writing a new type/class/struct; duplicate definitions cause compile errors
+- **Writing call sites from memory** — always verify a function's actual signature with LSP hover or grep before calling it; never rely on what you think the signature "should" be
+- **Trusting LSP diagnostics on recently-edited files** — LSP can lag after writes; use the compiler/build tool as the authoritative check
+- **Writing stubs without documenting their contract** — a stub with no comment forces the next implementer to reverse-engineer the expected API; always document what the real implementation should do
+- **Building a central registry/struct incrementally** — if a phase introduces a shared dependency container (service locator, activity struct, plugin registry), enumerate ALL required dependencies from the spec at the start of the phase, stub them as nil/empty, then write individual implementation files that reference them; avoids scattered retroactive edits
+- **Creating helpers for one-liners** — if the "helper" is two words in the standard library (e.g. `fmt.Errorf`), don't abstract it; the abstraction adds indirection without value
 
 ---
 
