@@ -39,10 +39,11 @@ When multiple skills could apply:
 |------------|----------------------|---------------------|
 | **beadflow** | Autonomous task management using Beads issue tracker for multi-step project orchestration | Multi-step projects, PRD breakdown, complex implementations, dependency tracking, task management, autonomous planning |
 | **sculptor** | Collaborative idea polishing through structured dialogue and file-based annotation cycles | Idea exploration, brainstorming, concept refinement, PRD creation, spec writing, "I have an idea", "help me design this", "let's think through this" |
+| **reviewer** | Comprehensive code review with tech-stack-specific checklists, spec deviation tracking, and structured report | Code review, codebase audit, spec compliance check, production readiness assessment, "review this code", "audit the codebase", "check against the spec" |
 
 ### Technical & Domain Skills
 
-*No technical skills currently available*
+*No technical skills currently available — reviewer is categorized as a Workflow skill*
 
 ## Detailed Skill Information
 
@@ -96,6 +97,29 @@ When multiple skills could apply:
 **Entry Point**: Present an idea in any form — the skill will guide from there
 
 **File Location**: `sculptor/SKILL.md`
+
+### reviewer
+
+**Category**: Workflow
+**Full Name**: reviewer
+**Description**: Comprehensive code review that explores the codebase, selects tech-stack-specific checklist modules, and produces a structured report with spec deviations and code quality findings in separate sections.
+
+**When to Activate**:
+- User asks to review a codebase or specific files
+- User wants to audit code quality or check production readiness
+- User wants to verify implementation against a spec, PRD, or requirements document
+- User says "review this code", "audit the codebase", "check against the spec", "assess code quality"
+
+**Key Capabilities**:
+- Auto-detects tech stack and selects relevant checklist modules (Go, TypeScript, Python, Rust, Java/Kotlin, Temporal, React, DB, API)
+- Builds spec traceability matrix when a spec is found
+- Separates spec deviations from code quality findings in the report
+- Produces severity-ranked findings with file:line references
+- Generates test coverage map and weighted scorecard
+
+**Entry Point**: Point the skill at a codebase and optionally a spec — it discovers both automatically
+
+**File Location**: `reviewer/SKILL.md`
 
 ## Usage Guidelines for Agents
 
@@ -165,5 +189,5 @@ This catalog is maintained manually. When new skills are added:
 
 ---
 
-**Last Updated**: 2026-02-27
-**Total Skills**: 2 (2 workflow, 0 technical)
+**Last Updated**: 2026-03-22
+**Total Skills**: 3 (3 workflow, 0 technical)
