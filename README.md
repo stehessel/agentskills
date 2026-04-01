@@ -8,26 +8,25 @@ A curated collection of skills for AI coding agents (Claude Code, Cursor, OpenAI
 
 1. Clone this repository:
    ```bash
-   git clone <your-repo-url> ~/.claude/skills
+   git clone <your-repo-url> ~/agentskills
+   cd ~/agentskills
    ```
 
-2. Skills are automatically discovered from `~/.claude/skills/` on startup
-
-3. Use skills by referencing them in conversation:
-   ```
-   "Let's use beadflow to manage this project"
-   ```
-
-### For Cursor
-
-1. Clone this repository to your preferred location:
+2. Install skills globally or to a specific project:
    ```bash
-   git clone <your-repo-url> ~/agent-skills
+   # Install all skills globally
+   make install-all-global
+
+   # Install a single skill to a project
+   make install SKILL=reviewer TARGET=~/myproject
+
+   # Copy instead of symlink (standalone, won't track updates)
+   make copy SKILL=reviewer TARGET=~/myproject
    ```
 
-2. Configure Cursor to load skills from this directory (see Cursor documentation for current setup method)
+3. Skills are automatically discovered from `~/.claude/skills/` or `<project>/.claude/skills/` on startup
 
-3. Skills will be available in your Cursor AI assistant sessions
+4. Run `make help` to see all available targets and skills
 
 ### For Other Agents
 
@@ -43,9 +42,11 @@ Skills following the agentskills.io specification can be used with any compatibl
 | [sculptor](./sculptor/SKILL.md) | Collaborative idea polishing through dialogue and annotation cycles | Exploring vague ideas, refining concepts, creating PRDs, specs, or implementation plans |
 | [reviewer](./reviewer/SKILL.md) | Comprehensive code review with tech-stack-specific checklists and structured report | Codebase audits, spec compliance checks, production readiness assessment, code quality reviews |
 
-### Technical Skills
+### Utility Skills
 
-*Coming soon - contributions welcome!*
+| Name | Description | When to Use |
+|------|-------------|-------------|
+| [session-viewer](./session-viewer/SKILL.md) | Parse and display Claude Code session JSONL files in multiple formats | Viewing, inspecting, analyzing, or debugging Claude Code sessions |
 
 ## How Skills Work
 
@@ -109,15 +110,25 @@ See the [agentskills.io specification](https://agentskills.io/specification) for
 
 ```
 .
-├── README.md           # This file (for humans)
-├── AGENTS.md           # Agent guidance (for AI)
-├── beadflow/           # Example skill
+├── README.md              # This file (for humans)
+├── AGENTS.md              # Agent guidance (for AI)
+├── Makefile               # Install/uninstall/copy skills
+├── ref/                   # Skill authoring reference docs
+├── beadflow/              # Task management skill
 │   └── SKILL.md
-└── your-skill/         # Your skills here
+├── sculptor/              # Idea polishing skill
+│   └── SKILL.md
+├── reviewer/              # Code review skill
+│   ├── SKILL.md
+│   ├── CHECKLIST-CATALOG.md
+│   └── REPORT-TEMPLATE.md
+├── session-viewer/        # Session viewer skill
+│   ├── SKILL.md
+│   ├── SCHEMA.md
+│   └── claude_session.py
+└── your-skill/            # Your skills here
     ├── SKILL.md
-    ├── scripts/        # Optional: executable scripts
-    ├── references/     # Optional: detailed documentation
-    └── assets/         # Optional: templates, diagrams
+    └── ...
 ```
 
 ## Contributing
