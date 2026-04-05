@@ -40,6 +40,7 @@ When multiple skills could apply:
 | **beadflow** | Autonomous task management using Beads issue tracker for multi-step project orchestration | Multi-step projects, PRD breakdown, complex implementations, dependency tracking, task management, autonomous planning |
 | **sculptor** | Collaborative idea polishing through structured dialogue and file-based annotation cycles | Idea exploration, brainstorming, concept refinement, PRD creation, spec writing, "I have an idea", "help me design this", "let's think through this" |
 | **reviewer** | Comprehensive code review with tech-stack-specific checklists, spec deviation tracking, and structured report | Code review, codebase audit, spec compliance check, production readiness assessment, "review this code", "audit the codebase", "check against the spec" |
+| **treeflow** | Orchestrates parallel execution using Beads and background AI workers | Large projects, parallel implementation, "use workers", "dispatch tasks", orchestrator mode, projects too large for single context |
 
 ### Technical & Domain Skills
 
@@ -121,6 +122,33 @@ When multiple skills could apply:
 
 **File Location**: `reviewer/SKILL.md`
 
+### treeflow
+
+**Category**: Workflow
+**Full Name**: treeflow
+**Description**: Orchestrates parallel execution using Beads issue graph and background AI workers. Dispatches tasks to named workers, tracks progress, reuses workers by skill affinity, and maintains layered project context. The orchestrator never writes code.
+
+**When to Activate**:
+- User invokes `/treeflow` (always activate)
+- User explicitly asks for parallel/distributed execution
+- User says "use workers", "dispatch tasks", "orchestrator mode"
+- Project has many independent tasks benefiting from parallelism
+- User wants to scale beyond single-agent sequential execution
+
+**Key Capabilities**:
+- Pure orchestrator — never reads/writes project source code
+- Spawns named background workers with fresh context windows
+- Reuses workers when context allows for cache efficiency
+- Routes tasks by skill (Go, React, Python, architecture, tests, etc.)
+- Layered context: project > epic > feature > task
+- Beads dependency graph for intelligent scheduling
+- File-conflict analysis for parallelism safety
+- Worker-to-user question bubbling
+
+**Entry Point**: `bd ready --json | jq -c` or provide a PRD/goal
+
+**File Location**: `treeflow/SKILL.md` (with COMMANDS.md, CONTEXT-MANAGEMENT.md, PLAN-FORMAT.md, SCULPTOR-IMPORT.md, WORKER-PROMPT.md, WORKER-CONTEXT-TEMPLATE.md, WORKER-REGISTRY-TEMPLATE.md)
+
 ## Usage Guidelines for Agents
 
 ### Skill Activation Pattern
@@ -189,5 +217,5 @@ This catalog is maintained manually. When new skills are added:
 
 ---
 
-**Last Updated**: 2026-03-22
-**Total Skills**: 3 (3 workflow, 0 technical)
+**Last Updated**: 2026-04-05
+**Total Skills**: 4 (4 workflow, 0 technical)
