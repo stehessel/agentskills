@@ -1,6 +1,6 @@
 # {Plan Name} — Worker Context
 
-> Sent to all workers. Do not include Worker Registry or Skill Routing — those are orchestrator-only (worker-registry.md).
+> Sent to all workers. Do not include Worker Registry or Skill Routing — those are orchestrator-only (registry.json).
 > Remove this header line before writing the file.
 
 ## Overview
@@ -35,9 +35,28 @@
 
 ## Known Gotchas
 
-{Empty at session start. Orchestrator appends entries as workers discover recurring issues.}
+<!-- Orchestrator: populate BEFORE first worker dispatch with project-specific entries.
+     Delete sections that don't apply to this project's stack. -->
 
-<!-- Example entry format:
-- **{Issue}**: {Explanation and what to do}
-  e.g. "TS `Cannot find name 'chrome'` diagnostics are LSP false positives in WXT projects — the build still passes, ignore them."
+<!-- Chrome Extensions (WXT/Plasmo):
+- `Cannot find name 'chrome'` LSP diagnostics are false positives — build passes, ignore them
+- Shadow DOM components must use `px` not `rem`
+- Background service workers have no DOM access
 -->
+
+<!-- TypeScript monorepos:
+- LSP may show errors for cross-package imports that resolve at build time
+- `pnpm build` is ground truth, not LSP red squiggles
+-->
+
+<!-- Go modules:
+- `go vet` false positives on generated code — check `//go:generate` before investigating
+- Wire/inject errors often mean you need to run `go generate ./...` first
+-->
+
+<!-- Python:
+- mypy errors on dynamic attrs (e.g., SQLAlchemy models) — if tests pass, ignore
+- venv activation varies by OS — use `python -m` prefix for portability
+-->
+
+{Add project-specific gotchas here. Orchestrator appends more as workers discover recurring issues.}

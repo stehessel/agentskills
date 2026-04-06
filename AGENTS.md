@@ -137,6 +137,7 @@ When multiple skills could apply:
 
 **Key Capabilities**:
 - Pure orchestrator — never reads/writes project source code
+- Deterministic state management via `tf.py` (Python) — registry, notifications, phase gates, smoke tests
 - Spawns named background workers with fresh context windows
 - Reuses workers when context allows for cache efficiency
 - Routes tasks by skill (Go, React, Python, architecture, tests, etc.)
@@ -144,10 +145,11 @@ When multiple skills could apply:
 - Beads dependency graph for intelligent scheduling
 - File-conflict analysis for parallelism safety
 - Worker-to-user question bubbling
+- Token-efficient: discards verbose notification content, stores compact summaries
 
 **Entry Point**: `bd ready --json | jq -c` or provide a PRD/goal
 
-**File Location**: `treeflow/SKILL.md` (with COMMANDS.md, CONTEXT-MANAGEMENT.md, PLAN-FORMAT.md, SCULPTOR-IMPORT.md, WORKER-PROMPT.md, WORKER-CONTEXT-TEMPLATE.md, WORKER-REGISTRY-TEMPLATE.md)
+**File Location**: `treeflow/SKILL.md` (with tf.py, COMMANDS.md, CONTEXT-MANAGEMENT.md, PLAN-FORMAT.md, SCULPTOR-IMPORT.md, WORKER-PROMPT.md, WORKER-CONTEXT-TEMPLATE.md, WORKER-REGISTRY-TEMPLATE.md)
 
 ## Usage Guidelines for Agents
 

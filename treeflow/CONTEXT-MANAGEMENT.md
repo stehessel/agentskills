@@ -15,8 +15,8 @@ Workers receive structured context layers relevant to their task, not a monolith
 
 ```
 .beads/context-{plan-name}/
-├── worker-context.md   # Sent to workers: tech stack, conventions, routing, known gotchas
-├── worker-registry.md  # Orchestrator-only: worker list, status, context %, last bead
+├── worker-context.md   # Sent to workers: tech stack, conventions, known gotchas
+├── registry.json       # Orchestrator-only: worker state, routing, phases (managed by tf.py)
 ├── phase-1.md          # Written after Phase 1 closes (summary for Phase 2+ workers)
 ├── phase-2.md          # Written after Phase 2 closes
 ├── epic-{slug}.md      # Per-epic context
@@ -40,37 +40,20 @@ Sent to all workers. Created by the orchestrator after planning. Contains:
 
 **All workers receive this layer.**
 
-## Worker Registry (`worker-registry.md`)
+## Worker Registry (`registry.json`)
 
-**Orchestrator-only — never sent to workers.** Contains the worker list:
+**Orchestrator-only — never sent to workers.** Managed exclusively by `tf.py` — never edit manually.
 
-```markdown
-## Worker Registry
+Contains worker state (status, context %, last bead, notification tracking), skill routing table, and phase gate tracking. See [WORKER-REGISTRY-TEMPLATE.md](WORKER-REGISTRY-TEMPLATE.md) for the full JSON schema.
 
-### chrome-api-1
-- **Status**: idle | **Skill**: chrome-api | **Context**: ~25% | **Last bead**: BD-12
-- **Idle since**: 14:32
+**Context % source of truth:** Always use the worker's self-reported `context_pct` value as recorded by `tf.py notify` or `tf.py worker-close`. The orchestrator does not estimate context usage — it reads from `tf.py registry`.
 
-### commands-1
-- **Status**: retired | **Skill**: commands | **Context**: ~80% | **Last bead**: BD-15
+Key commands:
+```bash
+python3 .beads/tf.py registry --status idle    # Find reuse candidates
+python3 .beads/tf.py status                    # One-line overview
+python3 .beads/tf.py phase-gate {epic-id}      # Check phase completion
 ```
-
-**Status values:** `active` | `idle` (resumable) | `retired` (context too full) | `failed`
-
-Also contains the **Skill Routing table** (built during planning from `Files:` lists across all beads):
-
-```markdown
-## Skill Routing
-| File patterns | Domain | Worker prefix |
-|---|---|---|
-| `lib/engine/commands/*.ts` | commands | `commands-` |
-| `entrypoints/background.ts`, `chrome.*` | chrome-api | `chrome-api-` |
-| `entrypoints/sidepanel/*.tsx`, `manager/*.tsx` | react-ui | `ui-` |
-| `lib/state/*.ts` | state | `state-` |
-| `tests/**` | testing | `test-` |
-```
-
-Kept separate from `worker-context.md` because both the registry and routing table are purely orchestrator decision-making tools — workers never need to read them.
 
 ## Phase Summary Files (`phase-{N}.md`)
 
@@ -127,13 +110,13 @@ Optional, per-feature. Created when a feature has multiple tasks that need share
 
 When a worker completes and closes its bead:
 
-1. Extract summary from `bd close --reason`
-2. Append to the appropriate context layer:
+1. Record completion via `tf.py notify` (updates registry atomically)
+2. Extract summary from notification and append to the appropriate context layer:
    - Task summary → epic context file (under `## Completed Tasks`)
    - Feature-level decisions → feature context file
    - Project-level decisions → `worker-context.md`
    - Recurring "issues that aren't issues" → `worker-context.md` under `## Known Gotchas`
-3. Update `worker-registry.md` (worker status, context %)
+3. **Discard the full `<task-notification>` result** — it is now captured in registry and context files
 
 ### Summary Format
 

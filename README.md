@@ -121,6 +121,7 @@ See the [agentskills.io specification](https://agentskills.io/specification) for
 │   └── SKILL.md
 ├── treeflow/              # Orchestrated parallel execution skill
 │   ├── SKILL.md
+│   ├── tf.py              # Python state manager (deterministic coordination)
 │   ├── COMMANDS.md
 │   ├── CONTEXT-MANAGEMENT.md
 │   ├── PLAN-FORMAT.md
