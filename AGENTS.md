@@ -24,6 +24,12 @@ When multiple skills could apply:
 3. **Most specific match**: Choose the skill with the most specific relevance to the task
 4. **Combine when appropriate**: Some skills work together (e.g., workflow + domain skills)
 
+### Beadflow vs Treeflow
+
+Both use Beads and support parallel sub-agents. The key difference: beadflow's main agent writes code + coordinates; treeflow's orchestrator never touches code and delegates everything to named, reusable workers with deterministic state management via `tf.py`.
+
+**Use beadflow** for most projects (5-15 tasks, fits in one context window). **Use treeflow** when the project exceeds one context window, workers benefit from reuse across phases, or you need coordination guarantees (phase gates, smoke tests). See [ref/beadflow-vs-treeflow.md](ref/beadflow-vs-treeflow.md) for the full decision guide.
+
 ### Activation Method
 
 1. Read the skill's SKILL.md file completely
