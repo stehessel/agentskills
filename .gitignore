@@ -1,0 +1,16 @@
+# APM (Agent Package Manager)
+apm_modules/
+
+# Claude Code
+.claude/settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

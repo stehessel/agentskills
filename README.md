@@ -4,15 +4,47 @@ A curated collection of skills for AI coding agents (Claude Code, Cursor, OpenAI
 
 ## Quick Start
 
-### For Claude Code
+### Using APM (Recommended)
+
+[APM (Agent Package Manager)](https://microsoft.github.io/apm/) is the recommended way to install and manage skills across multiple AI coding tools.
+
+1. Install APM:
+   ```bash
+   # macOS/Linux
+   curl -sSL https://aka.ms/apm-unix | sh
+
+   # Windows (PowerShell)
+   irm https://aka.ms/apm-windows | iex
+   ```
+
+2. Install skills to your project:
+   ```bash
+   # Install all skills from this collection
+   apm install stehessel/agentskills
+
+   # Or install individual skills
+   apm install stehessel/agentskills/beadflow
+   apm install stehessel/agentskills/reviewer
+   apm install stehessel/agentskills/sculptor
+   apm install stehessel/agentskills/treeflow
+   apm install stehessel/agentskills/session-viewer
+   ```
+
+3. Skills are automatically deployed to `.github/`, `.claude/`, `.cursor/`, `.opencode/`, and `.codex/` directories.
+
+4. Commit `apm.yml` and `apm.lock.yaml` to version control (ignore `apm_modules/`).
+
+### Manual Installation (Claude Code)
+
+If you prefer manual installation without APM:
 
 1. Clone this repository:
    ```bash
-   git clone <your-repo-url> ~/agentskills
+   git clone https://github.com/stehessel/agentskills ~/agentskills
    cd ~/agentskills
    ```
 
-2. Install skills globally or to a specific project:
+2. Install skills using Make:
    ```bash
    # Install all skills globally
    make install-all-global
@@ -24,9 +56,9 @@ A curated collection of skills for AI coding agents (Claude Code, Cursor, OpenAI
    make copy SKILL=reviewer TARGET=~/myproject
    ```
 
-3. Skills are automatically discovered from `~/.claude/skills/` or `<project>/.claude/skills/` on startup
+3. Skills are discovered from `~/.claude/skills/` or `<project>/.claude/skills/` on startup.
 
-4. Run `make help` to see all available targets and skills
+4. Run `make help` to see all available targets and skills.
 
 ### For Other Agents
 
@@ -109,11 +141,14 @@ See the [agentskills.io specification](https://agentskills.io/specification) for
 
 ## Repository Structure
 
+This repository is structured as an APM monorepo collection, where each skill is a subdirectory that can be installed individually or as a complete set. See [APM.md](./APM.md) for detailed APM installation and usage instructions.
+
 ```
 .
 ├── README.md              # This file (for humans)
 ├── AGENTS.md              # Agent guidance (for AI)
-├── Makefile               # Install/uninstall/copy skills
+├── apm.yml                # APM package manifest
+├── Makefile               # Manual install/uninstall/copy (alternative to APM)
 ├── ref/                   # Skill authoring reference docs
 ├── beadflow/              # Task management skill
 │   └── SKILL.md
@@ -146,11 +181,26 @@ See the [agentskills.io specification](https://agentskills.io/specification) for
 
 Contributions are welcome! Please:
 
-1. Follow the agentskills.io specification
+1. Follow the [agentskills.io specification](https://agentskills.io/specification)
 2. Test your skill with at least one AI agent
 3. Update both README.md and AGENTS.md
 4. Keep skills focused and well-documented
 5. Include clear activation triggers in the description
+6. Ensure skill names follow APM conventions (lowercase, hyphens only, 1-64 chars)
+
+### Publishing Skills
+
+Skills in this repository can be installed via APM:
+
+```bash
+# Install a specific skill
+apm install stehessel/agentskills/your-skill-name
+
+# Install all skills
+apm install stehessel/agentskills
+```
+
+Skills are automatically deployed to the appropriate directories for Claude Code, GitHub Copilot, Cursor, OpenCode, and other compatible agents.
 
 ## License
 

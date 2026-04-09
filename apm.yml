@@ -1,0 +1,12 @@
+name: agentskills
+version: 1.0.0
+description: A curated collection of skills for AI coding agents following the agentskills.io specification.
+license: MIT
+metadata:
+  author: stehessel
+  repository: https://github.com/stehessel/agentskills
+  homepage: https://github.com/stehessel/agentskills
+
+# Dependencies - can be added as needed
+dependencies:
+  apm: []
