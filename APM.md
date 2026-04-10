@@ -87,11 +87,11 @@ APM reads `apm.lock.yaml` and deploys the exact same skill versions to all agent
 
 | Skill | Description |
 |-------|-------------|
-| [beadflow](./beadflow/SKILL.md) | Autonomous task management using Beads issue tracker |
-| [sculptor](./sculptor/SKILL.md) | Collaborative idea polishing through dialogue and annotation cycles |
-| [reviewer](./reviewer/SKILL.md) | Comprehensive code review with tech-stack-specific checklists |
-| [treeflow](./treeflow/SKILL.md) | Orchestrated parallel execution with background AI workers |
-| [session-viewer](./session-viewer/SKILL.md) | Parse and display Claude Code session JSONL files |
+| [beadflow](./.apm/skills/beadflow/SKILL.md) | Autonomous task management using Beads issue tracker |
+| [sculptor](./.apm/skills/sculptor/SKILL.md) | Collaborative idea polishing through dialogue and annotation cycles |
+| [reviewer](./.apm/skills/reviewer/SKILL.md) | Comprehensive code review with tech-stack-specific checklists |
+| [treeflow](./.apm/skills/treeflow/SKILL.md) | Orchestrated parallel execution with background AI workers |
+| [session-viewer](./.apm/skills/session-viewer/SKILL.md) | Parse and display Claude Code session JSONL files |
 
 ## Updating Skills
 

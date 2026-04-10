@@ -70,16 +70,16 @@ Skills following the agentskills.io specification can be used with any compatibl
 
 | Name | Description | When to Use |
 |------|-------------|-------------|
-| [beadflow](./beadflow/SKILL.md) | Autonomous task management using Beads issue tracker | Multi-step projects, breaking down PRDs, managing complex implementations with dependency tracking |
-| [sculptor](./sculptor/SKILL.md) | Collaborative idea polishing through dialogue and annotation cycles | Exploring vague ideas, refining concepts, creating PRDs, specs, or implementation plans |
-| [reviewer](./reviewer/SKILL.md) | Comprehensive code review with tech-stack-specific checklists and structured report | Codebase audits, spec compliance checks, production readiness assessment, code quality reviews |
-| [treeflow](./treeflow/SKILL.md) | Orchestrated parallel execution with background AI workers | Large projects, parallel implementation, distributing work across multiple agents |
+| [beadflow](./.apm/skills/beadflow/SKILL.md) | Autonomous task management using Beads issue tracker | Multi-step projects, breaking down PRDs, managing complex implementations with dependency tracking |
+| [sculptor](./.apm/skills/sculptor/SKILL.md) | Collaborative idea polishing through dialogue and annotation cycles | Exploring vague ideas, refining concepts, creating PRDs, specs, or implementation plans |
+| [reviewer](./.apm/skills/reviewer/SKILL.md) | Comprehensive code review with tech-stack-specific checklists and structured report | Codebase audits, spec compliance checks, production readiness assessment, code quality reviews |
+| [treeflow](./.apm/skills/treeflow/SKILL.md) | Orchestrated parallel execution with background AI workers | Large projects, parallel implementation, distributing work across multiple agents |
 
 ### Utility Skills
 
 | Name | Description | When to Use |
 |------|-------------|-------------|
-| [session-viewer](./session-viewer/SKILL.md) | Parse and display Claude Code session JSONL files in multiple formats | Viewing, inspecting, analyzing, or debugging Claude Code sessions |
+| [session-viewer](./.apm/skills/session-viewer/SKILL.md) | Parse and display Claude Code session JSONL files in multiple formats | Viewing, inspecting, analyzing, or debugging Claude Code sessions |
 
 ## How Skills Work
 

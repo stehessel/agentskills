@@ -8,8 +8,8 @@
 
 # ── Config ───────────────────────────────────────────────────────────────────
 
-# All skill directories (auto-detected from SKILL.md presence)
-SKILLS := $(patsubst %/SKILL.md,%,$(wildcard */SKILL.md))
+# All skill directories (auto-detected from SKILL.md presence in .apm/skills/)
+SKILLS := $(patsubst .apm/skills/%/SKILL.md,%,$(wildcard .apm/skills/*/SKILL.md))
 
 # ── Colors ───────────────────────────────────────────────────────────────────
 
@@ -57,24 +57,24 @@ endif
 ifndef TARGET
 	@printf "  $(RED)✗$(RESET) TARGET is required. Usage: make install SKILL=<name> TARGET=<dir>\n" && exit 1
 endif
-	@if [ ! -d "$(CURDIR)/$(SKILL)" ] || [ ! -f "$(CURDIR)/$(SKILL)/SKILL.md" ]; then \
+	@if [ ! -d "$(CURDIR)/.apm/skills/$(SKILL)" ] || [ ! -f "$(CURDIR)/.apm/skills/$(SKILL)/SKILL.md" ]; then \
 	  printf "  $(RED)✗$(RESET) Skill '$(SKILL)' not found\n" && exit 1; \
 	fi
 	@mkdir -p "$(TARGET)/.claude/skills"
 	@if [ -L "$(TARGET)/.claude/skills/$(SKILL)" ]; then rm "$(TARGET)/.claude/skills/$(SKILL)"; fi
-	@ln -s "$(CURDIR)/$(SKILL)" "$(TARGET)/.claude/skills/$(SKILL)"
+	@ln -s "$(CURDIR)/.apm/skills/$(SKILL)" "$(TARGET)/.claude/skills/$(SKILL)"
 	@printf "  $(GREEN)✓$(RESET) $(BOLD)$(SKILL)$(RESET) → $(DIM)$(TARGET)/.claude/skills/$(SKILL)$(RESET)\n"
 
 install-global: ## Install a skill globally (SKILL=name)
 ifndef SKILL
 	@printf "  $(RED)✗$(RESET) SKILL is required. Usage: make install-global SKILL=<name>\n" && exit 1
 endif
-	@if [ ! -d "$(CURDIR)/$(SKILL)" ] || [ ! -f "$(CURDIR)/$(SKILL)/SKILL.md" ]; then \
+	@if [ ! -d "$(CURDIR)/.apm/skills/$(SKILL)" ] || [ ! -f "$(CURDIR)/.apm/skills/$(SKILL)/SKILL.md" ]; then \
 	  printf "  $(RED)✗$(RESET) Skill '$(SKILL)' not found\n" && exit 1; \
 	fi
 	@mkdir -p "$(HOME)/.claude/skills"
 	@if [ -L "$(HOME)/.claude/skills/$(SKILL)" ]; then rm "$(HOME)/.claude/skills/$(SKILL)"; fi
-	@ln -s "$(CURDIR)/$(SKILL)" "$(HOME)/.claude/skills/$(SKILL)"
+	@ln -s "$(CURDIR)/.apm/skills/$(SKILL)" "$(HOME)/.claude/skills/$(SKILL)"
 	@printf "  $(GREEN)✓$(RESET) $(BOLD)$(SKILL)$(RESET) → $(DIM)~/.claude/skills/$(SKILL)$(RESET)\n"
 
 # ── Uninstall (single skill) ─────────────────────────────────────────────────
@@ -133,24 +133,24 @@ endif
 ifndef TARGET
 	@printf "  $(RED)✗$(RESET) TARGET is required. Usage: make copy SKILL=<name> TARGET=<dir>\n" && exit 1
 endif
-	@if [ ! -d "$(CURDIR)/$(SKILL)" ] || [ ! -f "$(CURDIR)/$(SKILL)/SKILL.md" ]; then \
+	@if [ ! -d "$(CURDIR)/.apm/skills/$(SKILL)" ] || [ ! -f "$(CURDIR)/.apm/skills/$(SKILL)/SKILL.md" ]; then \
 	  printf "  $(RED)✗$(RESET) Skill '$(SKILL)' not found\n" && exit 1; \
 	fi
 	@mkdir -p "$(TARGET)/.claude/skills"
 	@rm -rf "$(TARGET)/.claude/skills/$(SKILL)"
-	@cp -R "$(CURDIR)/$(SKILL)" "$(TARGET)/.claude/skills/$(SKILL)"
+	@cp -R "$(CURDIR)/.apm/skills/$(SKILL)" "$(TARGET)/.claude/skills/$(SKILL)"
 	@printf "  $(GREEN)✓$(RESET) $(BOLD)$(SKILL)$(RESET) copied → $(DIM)$(TARGET)/.claude/skills/$(SKILL)$(RESET)\n"
 
 copy-global: ## Copy a skill globally (SKILL=name)
 ifndef SKILL
 	@printf "  $(RED)✗$(RESET) SKILL is required. Usage: make copy-global SKILL=<name>\n" && exit 1
 endif
-	@if [ ! -d "$(CURDIR)/$(SKILL)" ] || [ ! -f "$(CURDIR)/$(SKILL)/SKILL.md" ]; then \
+	@if [ ! -d "$(CURDIR)/.apm/skills/$(SKILL)" ] || [ ! -f "$(CURDIR)/.apm/skills/$(SKILL)/SKILL.md" ]; then \
 	  printf "  $(RED)✗$(RESET) Skill '$(SKILL)' not found\n" && exit 1; \
 	fi
 	@mkdir -p "$(HOME)/.claude/skills"
 	@rm -rf "$(HOME)/.claude/skills/$(SKILL)"
-	@cp -R "$(CURDIR)/$(SKILL)" "$(HOME)/.claude/skills/$(SKILL)"
+	@cp -R "$(CURDIR)/.apm/skills/$(SKILL)" "$(HOME)/.claude/skills/$(SKILL)"
 	@printf "  $(GREEN)✓$(RESET) $(BOLD)$(SKILL)$(RESET) copied → $(DIM)~/.claude/skills/$(SKILL)$(RESET)\n"
 
 # ── Copy all ─────────────────────────────────────────────────────────────────
